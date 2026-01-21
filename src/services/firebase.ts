@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -90,6 +91,24 @@ export const getCurrentUser = (): User | null => {
  */
 export const onAuthChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
+};
+
+/**
+ * Custom hook for auth state
+ */
+export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  return { user, loading };
 };
 
 export default app;
